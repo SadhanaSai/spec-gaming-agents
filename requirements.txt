@@ -1,0 +1,5 @@
+boto3
+python-dotenv
+langgraph
+langchain-core
+langchain-ollama
