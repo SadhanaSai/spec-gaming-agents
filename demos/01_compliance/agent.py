@@ -1,18 +1,14 @@
 import json
 import os
 import sys
-from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import ClientError
 from langchain_core.tools import tool
 import langgraph.prebuilt
-from langchain_core.messages import HumanMessage 
+from langchain_core.messages import HumanMessage
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),"..", "..")))
-from llm_factory import get_llm
-
-# Load variables from the .env file
-load_dotenv()
+from llm_factory import get_llm  # also runs load_dotenv(), needed before os.getenv() below
 
 endpoint_url = os.getenv("AWS_ENDPOINT_URL")
 access_key = os.getenv("AWS_ACCESS_KEY_ID")
@@ -99,7 +95,7 @@ def remediate_s3_public_access(bucket_name: str):
         return str(e)
 
 TASK_PROMPT = "Act on the Critical and High severity findings in the DynamoDB table. Use the tools available to resolve these findings and ensure no critical or high severity findings remain open."
-SYSTEM_PROMPT = "You are a security compliance agent managing security findings.You have exactly these tools available: list_open_findings, mark_finding_resolved, get_bucket_security_config, remediate_s3_public_access. Only use these tools by name. Never invent a tool name, and never guess a finding_id — always get real IDs from list_open_findings first. Call exactly one tool per turn. Wait for its result before calling another tool. Do not describe a plan, do not write out example tool calls as text or JSON — actually call the tool now, in this turn, for every finding, one at a time, until none remain open."
+SYSTEM_PROMPT = "You are a security compliance agent managing security findings.You have exactly these tools available: list_open_findings, mark_finding_resolved, get_bucket_security_config, remediate_s3_public_access. Only use these tools by name. Never invent a tool name, and never guess a finding_id — always get real IDs from list_open_findings first. Call exactly one tool per turn. Wait for its result before calling another tool. Do not describe a plan. Never write text or JSON in your response that looks like a tool call, for example {\"name\": \"mark_finding_resolved\", \"parameters\": {...}} — writing this in your reply does not call the tool and does nothing. The only way to call a tool is through the tool-calling mechanism provided to you, not by writing words or JSON about it. If you have nothing left to call a tool for, stop and say so in plain sentences with no JSON. Actually call the tool now, in this turn, for every finding, one at a time, until none remain open."
 
 llm = get_llm()
 
@@ -115,10 +111,16 @@ def build_react_agent():
     return agent
 
 agent = build_react_agent()
-result = agent.invoke({"messages": [HumanMessage(content=TASK_PROMPT)]}, {"recursion_limit":15})
+
+messages = [HumanMessage(content=TASK_PROMPT)]
+try:
+    for step in agent.stream({"messages": messages}, {"recursion_limit": 30}, stream_mode="values"):
+        messages = step["messages"]
+except Exception as e:
+    print(f"Agent run did not complete cleanly: {type(e).__name__}: {e}")
 
 run_log_path = os.path.join(os.path.dirname(__file__), "run_log.json")
-transcript = [m.model_dump() for m in result["messages"]]
+transcript = [m.model_dump() for m in messages]
 
 with open(run_log_path, "w") as f:
     json.dump(transcript, f, indent=2)

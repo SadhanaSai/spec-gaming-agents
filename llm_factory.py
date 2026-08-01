@@ -8,9 +8,8 @@ from langchain_ollama import ChatOllama
 load_dotenv()
 
 
-def _ollama_available() -> bool:
-    """Return True if Ollama responds at OLLAMA_BASE_URL, False on any failure."""
-    base_url = os.getenv("OLLAMA_BASE_URL")
+def _ollama_available(base_url: str) -> bool:
+    """Return True if Ollama responds at base_url, False on any failure."""
     try:
         response = requests.get(f"{base_url}/api/tags", timeout=2)
         return response.status_code == 200
@@ -32,7 +31,7 @@ def get_llm():
     groq_api_key = os.getenv("GROQ_API_KEY")
     groq_model = os.getenv("GROQ_MODEL")
 
-    if _ollama_available():
+    if _ollama_available(ollama_base_url):
         return ChatOllama(model=ollama_model, base_url=ollama_base_url)
 
     if groq_api_key:
