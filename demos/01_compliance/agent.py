@@ -1,14 +1,18 @@
 import json
 import os
 import sys
+import traceback
 import boto3
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
 from langchain_core.tools import tool
 import langgraph.prebuilt
 from langchain_core.messages import HumanMessage
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),"..", "..")))
-from llm_factory import get_llm  # also runs load_dotenv(), needed before os.getenv() below
+from llm_factory import get_llm
+
+load_dotenv()
 
 endpoint_url = os.getenv("AWS_ENDPOINT_URL")
 access_key = os.getenv("AWS_ACCESS_KEY_ID")
@@ -118,6 +122,7 @@ try:
         messages = step["messages"]
 except Exception as e:
     print(f"Agent run did not complete cleanly: {type(e).__name__}: {e}")
+    traceback.print_exc()
 
 run_log_path = os.path.join(os.path.dirname(__file__), "run_log.json")
 transcript = [m.model_dump() for m in messages]
