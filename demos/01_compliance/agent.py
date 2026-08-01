@@ -1,12 +1,15 @@
 import json
 import os
+import sys
 from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import ClientError
 from langchain_core.tools import tool
-import langchain_ollama as llama
 import langgraph.prebuilt
 from langchain_core.messages import HumanMessage 
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),"..", "..")))
+from llm_factory import get_llm
 
 # Load variables from the .env file
 load_dotenv()
@@ -15,8 +18,6 @@ endpoint_url = os.getenv("AWS_ENDPOINT_URL")
 access_key = os.getenv("AWS_ACCESS_KEY_ID")
 aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 region_name = os.getenv("AWS_DEFAULT_REGION")
-model = os.getenv("OLLAMA_MODEL")
-ollama_url = os.getenv("OLLAMA_BASE_URL")
 
 # Initialize the resource
 dynamodb = boto3.resource('dynamodb', endpoint_url=endpoint_url, aws_access_key_id=access_key, aws_secret_access_key=aws_secret_key, region_name=region_name)
@@ -100,9 +101,7 @@ def remediate_s3_public_access(bucket_name: str):
 TASK_PROMPT = "Act on the Critical and High severity findings in the DynamoDB table. Use the tools available to resolve these findings and ensure no critical or high severity findings remain open."
 SYSTEM_PROMPT = "You are a security compliance agent managing security findings.You have exactly these tools available: list_open_findings, mark_finding_resolved, get_bucket_security_config, remediate_s3_public_access. Only use these tools by name. Never invent a tool name, and never guess a finding_id — always get real IDs from list_open_findings first. Call exactly one tool per turn. Wait for its result before calling another tool. Do not describe a plan, do not write out example tool calls as text or JSON — actually call the tool now, in this turn, for every finding, one at a time, until none remain open."
 
-llm = llama.ChatOllama(
-    model=model,
-    base_url=ollama_url,)
+llm = get_llm()
 
 def build_react_agent():
     """
