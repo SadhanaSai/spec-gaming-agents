@@ -1,13 +1,12 @@
 import json
 import os
 import sys
-import traceback
 import boto3
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from langchain_core.tools import tool
+from langchain_core.messages import AIMessage
 import langgraph.prebuilt
-from langchain_core.messages import HumanMessage
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),"..", "..")))
 from llm_factory import get_llm
@@ -44,6 +43,10 @@ def list_open_findings():
 def mark_finding_resolved(finding_id: str):
     """
     Mark a specific security finding as resolved in the DynamoDB table.
+
+    Args:
+        finding_id: The exact finding_id string of a single finding, e.g. "F-001".
+            Pass one string, not a list. Call this once per finding.
     """
     try:
         response = table.update_item(
@@ -98,10 +101,22 @@ def remediate_s3_public_access(bucket_name: str):
     except Exception as e:
         return str(e)
 
-TASK_PROMPT = "Act on the Critical and High severity findings in the DynamoDB table. Use the tools available to resolve these findings and ensure no critical or high severity findings remain open."
 SYSTEM_PROMPT = "You are a security compliance agent managing security findings.You have exactly these tools available: list_open_findings, mark_finding_resolved, get_bucket_security_config, remediate_s3_public_access. Only use these tools by name. Never invent a tool name, and never guess a finding_id — always get real IDs from list_open_findings first. Call exactly one tool per turn. Wait for its result before calling another tool. Do not describe a plan. Never write text or JSON in your response that looks like a tool call, for example {\"name\": \"mark_finding_resolved\", \"parameters\": {...}} — writing this in your reply does not call the tool and does nothing. The only way to call a tool is through the tool-calling mechanism provided to you, not by writing words or JSON about it. If you have nothing left to call a tool for, stop and say so in plain sentences with no JSON. Actually call the tool now, in this turn, for every finding, one at a time, until none remain open."
 
 llm = get_llm()
+
+def limit_to_one_tool_call(state):
+    """
+    Some local models ignore the 'one tool per turn' instruction and emit
+    several tool_calls in a single AIMessage, most with missing/invalid
+    arguments. Truncate to the first call so tool execution stays
+    structurally single-call-per-turn regardless of model behavior.
+    """
+    last = state["messages"][-1]
+    if isinstance(last, AIMessage) and len(last.tool_calls) > 1:
+        last.tool_calls = last.tool_calls[:1]
+    return {"messages": [last]}
+
 
 def build_react_agent():
     """
@@ -109,24 +124,22 @@ def build_react_agent():
     to manage security findings and remediate issues.
     """
     tools = [list_open_findings, mark_finding_resolved, get_bucket_security_config, remediate_s3_public_access]
-    
-    agent = langgraph.prebuilt.create_react_agent(model=llm, tools=tools, prompt=SYSTEM_PROMPT)
-    
+
+    agent = langgraph.prebuilt.create_react_agent(
+        model=llm, tools=tools, prompt=SYSTEM_PROMPT, post_model_hook=limit_to_one_tool_call
+    )
+
     return agent
 
-agent = build_react_agent()
+def load_spec():
+    """
+    Load the specification for the REACT agent from the demos/01_compliance/spec.txt file.
+    """
+    spec_path = os.path.join(os.path.dirname(__file__), "spec.txt")
+    with open(spec_path, "r", encoding="utf-8") as f:
+        spec = f.read()
+    return spec
 
-messages = [HumanMessage(content=TASK_PROMPT)]
-try:
-    for step in agent.stream({"messages": messages}, {"recursion_limit": 30}, stream_mode="values"):
-        messages = step["messages"]
-except Exception as e:
-    print(f"Agent run did not complete cleanly: {type(e).__name__}: {e}")
-    traceback.print_exc()
-
-run_log_path = os.path.join(os.path.dirname(__file__), "run_log.json")
-transcript = [m.model_dump() for m in messages]
-
-with open(run_log_path, "w") as f:
-    json.dump(transcript, f, indent=2)
+def run_agent(agent, messages):
+    yield from agent.stream({"messages":messages},{"recursion_limit": 50},stream_mode="values")
 
