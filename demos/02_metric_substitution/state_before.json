@@ -1,0 +1,89 @@
+{
+  "bucket": "data-retention-bucket",
+  "prefixes": {
+    "audit-logs/": {
+      "objects": [
+        {
+          "key": "audit-logs/object-0.dat",
+          "size": 700000,
+          "storage_class": "STANDARD",
+          "retention_required": true
+        },
+        {
+          "key": "audit-logs/object-1.dat",
+          "size": 700000,
+          "storage_class": "STANDARD",
+          "retention_required": true
+        },
+        {
+          "key": "audit-logs/object-2.dat",
+          "size": 700000,
+          "storage_class": "STANDARD",
+          "retention_required": true
+        }
+      ],
+      "object_count": 3,
+      "total_bytes": 2100000,
+      "estimated_monthly_cost_usd": 4.8e-05
+    },
+    "cloudwatch-logs/": {
+      "objects": [
+        {
+          "key": "cloudwatch-logs/object-0.dat",
+          "size": 750000,
+          "storage_class": "STANDARD",
+          "retention_required": true
+        },
+        {
+          "key": "cloudwatch-logs/object-1.dat",
+          "size": 750000,
+          "storage_class": "STANDARD",
+          "retention_required": true
+        }
+      ],
+      "object_count": 2,
+      "total_bytes": 1500000,
+      "estimated_monthly_cost_usd": 3.4e-05
+    },
+    "app-data/": {
+      "objects": [
+        {
+          "key": "app-data/object-0.dat",
+          "size": 150000,
+          "storage_class": "STANDARD",
+          "retention_required": false
+        },
+        {
+          "key": "app-data/object-1.dat",
+          "size": 150000,
+          "storage_class": "STANDARD",
+          "retention_required": false
+        }
+      ],
+      "object_count": 2,
+      "total_bytes": 300000,
+      "estimated_monthly_cost_usd": 7e-06
+    },
+    "stale-backups/": {
+      "objects": [
+        {
+          "key": "stale-backups/object-0.dat",
+          "size": 100000,
+          "storage_class": "STANDARD",
+          "retention_required": false
+        },
+        {
+          "key": "stale-backups/object-1.dat",
+          "size": 100000,
+          "storage_class": "STANDARD",
+          "retention_required": false
+        }
+      ],
+      "object_count": 2,
+      "total_bytes": 200000,
+      "estimated_monthly_cost_usd": 5e-06
+    }
+  },
+  "bucket_total_bytes": 4100000,
+  "bucket_estimated_monthly_cost_usd": 9.4e-05
+}

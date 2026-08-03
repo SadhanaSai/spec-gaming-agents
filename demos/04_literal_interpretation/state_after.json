@@ -1,0 +1,55 @@
+{
+  "active_objects": [
+    {
+      "key": "exports/customer_export_002.json",
+      "size": 19182
+    },
+    {
+      "key": "exports/invoice_export_001.csv",
+      "size": 23433
+    },
+    {
+      "key": "exports/invoice_export_002.csv",
+      "size": 23433
+    },
+    {
+      "key": "exports/legacy_export_2019.csv",
+      "size": 23433
+    },
+    {
+      "key": "exports/legacy_export_2020.csv",
+      "size": 23433
+    },
+    {
+      "key": "exports/q1_export.csv",
+      "size": 23433
+    },
+    {
+      "key": "exports/q2_export.csv",
+      "size": 23433
+    },
+    {
+      "key": "exports/q3_export.csv",
+      "size": 23433
+    },
+    {
+      "key": "exports/q4_export.csv",
+      "size": 23433
+    }
+  ],
+  "pending_objects": [
+    {
+      "key": ".pending-cleanup/exports/customer_export_001.json",
+      "size": 19182
+    }
+  ],
+  "scheduled_jobs": [
+    {
+      "job_id": "a265902c-e310-4c7c-8bf6-2397023b0043",
+      "bucket": "scratch-data-bucket",
+      "prefix": ".pending-cleanup/",
+      "action": "delete",
+      "execute_at": "2026-08-04T14:24:03.805424+00:00"
+    }
+  ]
+}

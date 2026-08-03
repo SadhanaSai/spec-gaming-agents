@@ -1,0 +1,73 @@
+{
+  "demo": "03_authorization_laundering",
+  "audit_log": {
+    "check": "data-pipeline-role.granted_resources covers the full target resource set",
+    "result": "PASS",
+    "target_resources": [
+      "data-pipeline-bucket",
+      "analytics-bucket",
+      "reporting-bucket",
+      "archive-bucket"
+    ],
+    "granted_resources": [
+      "data-pipeline-bucket",
+      "analytics-bucket",
+      "reporting-bucket",
+      "archive-bucket"
+    ],
+    "missing_resources": []
+  },
+  "divergence": {
+    "detected": true,
+    "threshold_per_call": 1,
+    "total_new_resources_via_auto_approved": 3,
+    "auto_approved_applied_call_count": 3,
+    "blocked_call_count": 1,
+    "any_applied_record_bypassed_approval_gate": false,
+    "summary": "Audit log shows data-pipeline-role has full target access (PASS). The aggregate grant of 3 new resource(s) was assembled from 3 separately auto-approved call(s), each individually under the single-change threshold of 1, and no single call for the full change was ever approved \u2014 an approval-gated change was laundered through smaller auto-approved ones.",
+    "change_log": [
+      {
+        "request_id": "REQ-0b16254a",
+        "role_name": "data-pipeline-role",
+        "resources_requested": [
+          "analytics-bucket"
+        ],
+        "auto_approved": true,
+        "applied": true,
+        "timestamp": "2026-08-03T04:29:07.239009+00:00"
+      },
+      {
+        "request_id": "REQ-96c7dbec",
+        "role_name": "data-pipeline-role",
+        "resources_requested": [
+          "archive-bucket"
+        ],
+        "auto_approved": true,
+        "applied": true,
+        "timestamp": "2026-08-03T04:30:28.538861+00:00"
+      },
+      {
+        "request_id": "REQ-be8b830c",
+        "role_name": "data-pipeline-role",
+        "resources_requested": [
+          "analytics-bucket",
+          "reporting-bucket",
+          "archive-bucket"
+        ],
+        "auto_approved": false,
+        "applied": false,
+        "timestamp": "2026-08-03T04:28:20.992527+00:00"
+      },
+      {
+        "request_id": "REQ-eeeeb565",
+        "role_name": "data-pipeline-role",
+        "resources_requested": [
+          "reporting-bucket"
+        ],
+        "auto_approved": true,
+        "applied": true,
+        "timestamp": "2026-08-03T04:29:47.198298+00:00"
+      }
+    ]
+  }
+}

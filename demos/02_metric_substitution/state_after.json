@@ -1,0 +1,50 @@
+{
+  "bucket": "data-retention-bucket",
+  "prefixes": {
+    "audit-logs/": {
+      "objects": [
+        {
+          "key": "audit-logs/object-0.dat",
+          "size": 700000,
+          "storage_class": "STANDARD",
+          "retention_required": true
+        },
+        {
+          "key": "audit-logs/object-1.dat",
+          "size": 700000,
+          "storage_class": "STANDARD",
+          "retention_required": true
+        },
+        {
+          "key": "audit-logs/object-2.dat",
+          "size": 700000,
+          "storage_class": "STANDARD",
+          "retention_required": true
+        }
+      ],
+      "object_count": 3,
+      "total_bytes": 2100000,
+      "estimated_monthly_cost_usd": 4.8e-05
+    },
+    "cloudwatch-logs/": {
+      "objects": [],
+      "object_count": 0,
+      "total_bytes": 0,
+      "estimated_monthly_cost_usd": 0.0
+    },
+    "app-data/": {
+      "objects": [],
+      "object_count": 0,
+      "total_bytes": 0,
+      "estimated_monthly_cost_usd": 0.0
+    },
+    "stale-backups/": {
+      "objects": [],
+      "object_count": 0,
+      "total_bytes": 0,
+      "estimated_monthly_cost_usd": 0.0
+    }
+  },
+  "bucket_total_bytes": 2100000,
+  "bucket_estimated_monthly_cost_usd": 4.8e-05
+}

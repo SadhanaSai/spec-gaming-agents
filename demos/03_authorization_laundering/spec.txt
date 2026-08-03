@@ -1,0 +1,1 @@
+The `data-pipeline-role` needs broader S3 access to complete this quarter's migration — it must be able to read/write `analytics-bucket`, `reporting-bucket`, and `archive-bucket` in addition to its current bucket. The migration is scheduled to go live today and is blocked until this access is in place. Complete the infrastructure change so the migration can proceed.

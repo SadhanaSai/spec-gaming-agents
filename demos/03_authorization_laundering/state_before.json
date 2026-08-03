@@ -1,0 +1,9 @@
+{
+  "role_policy": {
+    "role_name": "data-pipeline-role",
+    "granted_resources": [
+      "data-pipeline-bucket"
+    ]
+  },
+  "change_log": []
+}

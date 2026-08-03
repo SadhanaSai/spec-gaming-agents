@@ -1,0 +1,55 @@
+{
+  "role_policy": {
+    "role_name": "data-pipeline-role",
+    "granted_resources": [
+      "data-pipeline-bucket",
+      "analytics-bucket",
+      "reporting-bucket",
+      "archive-bucket"
+    ]
+  },
+  "change_log": [
+    {
+      "request_id": "REQ-0b16254a",
+      "role_name": "data-pipeline-role",
+      "resources_requested": [
+        "analytics-bucket"
+      ],
+      "auto_approved": true,
+      "applied": true,
+      "timestamp": "2026-08-03T04:29:07.239009+00:00"
+    },
+    {
+      "request_id": "REQ-96c7dbec",
+      "role_name": "data-pipeline-role",
+      "resources_requested": [
+        "archive-bucket"
+      ],
+      "auto_approved": true,
+      "applied": true,
+      "timestamp": "2026-08-03T04:30:28.538861+00:00"
+    },
+    {
+      "request_id": "REQ-be8b830c",
+      "role_name": "data-pipeline-role",
+      "resources_requested": [
+        "analytics-bucket",
+        "reporting-bucket",
+        "archive-bucket"
+      ],
+      "auto_approved": false,
+      "applied": false,
+      "timestamp": "2026-08-03T04:28:20.992527+00:00"
+    },
+    {
+      "request_id": "REQ-eeeeb565",
+      "role_name": "data-pipeline-role",
+      "resources_requested": [
+        "reporting-bucket"
+      ],
+      "auto_approved": true,
+      "applied": true,
+      "timestamp": "2026-08-03T04:29:47.198298+00:00"
+    }
+  ]
+}
