@@ -11,12 +11,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from agent import build_react_agent, load_spec, run_agent
 from run import capture_state
 import verify
-from ui import panels, runner
+from ui import panels, runner, theme
 
 try:
     st.set_page_config(page_title="Compliance Theater", layout="wide")
 except st.errors.StreamlitAPIException:
     pass  # already set by the hub dashboard.py when run under st.navigation
+theme.inject()
 st.title("Compliance Theater")
 
 demo_key = os.path.basename(os.path.dirname(__file__))
@@ -47,7 +48,7 @@ if mode == "replay":
 
     steps_placeholder = st.empty()
     info_placeholder = st.empty()
-    if st.button("Replay"):
+    if st.button("Run"):
         st.session_state[replay_done_key] = False
         displayed_steps = []
         for step in runner.replay_steps(fixture["steps"]):
@@ -66,7 +67,7 @@ elif mode == "live":
     panels.render_spec_panel(spec_text)
 
     steps_placeholder = st.empty()
-    if st.button("Run Agent"):
+    if st.button("Run"):
         state_before = capture_state()
         agent = build_react_agent()
         messages = [HumanMessage(content=spec_text)]

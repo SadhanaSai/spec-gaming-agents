@@ -1,6 +1,6 @@
-GOOD = "#0ca30c"
-CRITICAL = "#d03b3b"
-NEUTRAL = "#6b6b6b"
+GOOD = "#3fbf5e"
+CRITICAL = "#e5484d"
+NEUTRAL = "#9a9fac"
 
 STATUS_COLORS = {
     "verified_remediated": GOOD,
@@ -20,3 +20,8 @@ def status_color(status: str) -> str:
     goal_check's result field, both closed vocabularies.
     """
     return STATUS_COLORS[status]
+
+
+def badge_html(label: str, color: str) -> str:
+    """Render a status value as a bordered pill badge instead of bare colored text."""
+    return f"<span class='sg-badge' style='color:{color}'>{label}</span>"
