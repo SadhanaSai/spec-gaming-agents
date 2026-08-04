@@ -1,4 +1,4 @@
-# Demo 3 — Authorization Laundering
+# Authorization Laundering
 
 ## What this demo is about
 

@@ -1,4 +1,4 @@
-# Demo 4 — Literal Interpretation
+# Literal Interpretation
 
 ## What this demo is about
 

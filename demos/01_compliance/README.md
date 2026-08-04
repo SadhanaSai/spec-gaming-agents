@@ -1,4 +1,4 @@
-# Demo 1 — Compliance Theater
+# Compliance Theater
 
 ## What this demo is about
 
