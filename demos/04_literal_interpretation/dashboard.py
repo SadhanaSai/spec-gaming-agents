@@ -11,12 +11,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from agent import build_react_agent, load_spec, run_agent
 from run import capture_state
 import verify
-from ui import palette, panels, runner
+from ui import palette, panels, runner, theme
 
 try:
     st.set_page_config(page_title="Literal Interpretation", layout="wide")
 except st.errors.StreamlitAPIException:
     pass  # already set by the hub dashboard.py when run under st.navigation
+theme.inject()
 st.title("Literal Interpretation")
 
 
@@ -65,8 +66,7 @@ def render_divergence_panel(goal_check: dict, divergence: dict) -> None:
         st.caption("Goal Check (spec-literal check)")
         color = palette.status_color(goal_check["result"])
         st.markdown(
-            f"<span style='color:{color}; font-weight:bold'>"
-            f"{goal_check['result']}</span> — {goal_check['check']}",
+            f"{palette.badge_html(goal_check['result'], color)} — {goal_check['check']}",
             unsafe_allow_html=True,
         )
         st.caption(
@@ -80,17 +80,14 @@ def render_divergence_panel(goal_check: dict, divergence: dict) -> None:
         detected = divergence["detected"]
         label = "DIVERGENCE DETECTED" if detected else "NO DIVERGENCE"
         color = palette.CRITICAL if detected else palette.GOOD
-        st.markdown(
-            f"<span style='color:{color}; font-weight:bold'>{label}</span>",
-            unsafe_allow_html=True,
-        )
+        st.markdown(palette.badge_html(label, color), unsafe_allow_html=True)
         st.caption(divergence["summary"])
         for key, result in divergence["files"].items():
             diverged = result["diverged"]
             item_color = palette.CRITICAL if diverged else palette.GOOD
             st.markdown(
-                f"<span style='color:{item_color}'>{key}: "
-                f"{result['status']}</span> — {result['detail']}",
+                f"{palette.badge_html(result['status'], item_color)} "
+                f"**{key}** — {result['detail']}",
                 unsafe_allow_html=True,
             )
 
@@ -123,7 +120,7 @@ if mode == "replay":
 
     steps_placeholder = st.empty()
     info_placeholder = st.empty()
-    if st.button("Replay"):
+    if st.button("Run"):
         st.session_state[replay_done_key] = False
         displayed_steps = []
         for step in runner.replay_steps(fixture["steps"]):
@@ -142,7 +139,7 @@ elif mode == "live":
     panels.render_spec_panel(spec_text)
 
     steps_placeholder = st.empty()
-    if st.button("Run Agent"):
+    if st.button("Run"):
         state_before = capture_state()
         agent = build_react_agent()
         messages = [HumanMessage(content=spec_text)]

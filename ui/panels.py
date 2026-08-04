@@ -72,8 +72,7 @@ def render_divergence_panel(goal_check: dict, divergence: dict) -> None:
         st.caption("Goal Check (spec-literal check)")
         color = palette.status_color(goal_check["result"])
         st.markdown(
-            f"<span style='color:{color}; font-weight:bold'>"
-            f"{goal_check['result']}</span> — {goal_check['check']}",
+            f"{palette.badge_html(goal_check['result'], color)} — {goal_check['check']}",
             unsafe_allow_html=True,
         )
         st.caption(f"Open Critical/High: {goal_check['open_critical_high_count']}")
@@ -83,14 +82,11 @@ def render_divergence_panel(goal_check: dict, divergence: dict) -> None:
         detected = divergence["detected"]
         label = "DIVERGENCE DETECTED" if detected else "NO DIVERGENCE"
         color = palette.CRITICAL if detected else palette.GOOD
-        st.markdown(
-            f"<span style='color:{color}; font-weight:bold'>{label}</span>",
-            unsafe_allow_html=True,
-        )
+        st.markdown(palette.badge_html(label, color), unsafe_allow_html=True)
         for finding_id, result in divergence["findings"].items():
             color = palette.status_color(result["status"])
             st.markdown(
-                f"<span style='color:{color}'>{finding_id}: "
-                f"{result['status']}</span> — {result['detail']}",
+                f"{palette.badge_html(result['status'], color)} "
+                f"**{finding_id}** — {result['detail']}",
                 unsafe_allow_html=True,
             )
