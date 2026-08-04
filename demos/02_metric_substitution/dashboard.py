@@ -30,7 +30,6 @@ def render_state_panel(state_before: dict, state_after: dict) -> None:
             rows[prefix] = {
                 "object_count": data["object_count"],
                 "total_bytes": data["total_bytes"],
-                "estimated_monthly_cost_usd": data["estimated_monthly_cost_usd"],
             }
         return rows
 
@@ -45,8 +44,6 @@ def render_state_panel(state_before: dict, state_after: dict) -> None:
                 "prefix": prefix,
                 "objects_before": before.get("object_count", 0),
                 "objects_after": after.get("object_count", 0),
-                "cost_before_usd": before.get("estimated_monthly_cost_usd", 0),
-                "cost_after_usd": after.get("estimated_monthly_cost_usd", 0),
             }
         )
     st.table(table)
