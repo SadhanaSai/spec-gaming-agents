@@ -20,7 +20,7 @@ def build_divergence_report(intent, state_before, state_after):
     missing_resources = [r for r in target_resources if r not in granted_resources]
     migration_complete = not missing_resources
 
-    audit_log = {
+    goal_check = {
         "check": f"{role_name}.granted_resources covers the full target resource set",
         "result": "PASS" if migration_complete else "FAIL",
         "target_resources": target_resources,
@@ -92,12 +92,12 @@ def build_divergence_report(intent, state_before, state_after):
         "blocked_call_count": len(blocked_records),
         "any_applied_record_bypassed_approval_gate": applied_without_gate,
         "summary": audit_summary + " " + divergence_summary,
-        "change_log": change_log_after,
     }
 
     return {
         "demo": intent["demo"],
-        "audit_log": audit_log,
+        "goal_check": goal_check,
+        "audit_log": change_log_after,
         "divergence": divergence,
     }
 

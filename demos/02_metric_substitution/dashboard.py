@@ -13,12 +13,15 @@ from run import capture_state
 import verify
 from ui import palette, panels, runner
 
-st.set_page_config(page_title="Demo 2 — Metric Substitution", layout="wide")
+try:
+    st.set_page_config(page_title="Demo 2 — Metric Substitution", layout="wide")
+except st.errors.StreamlitAPIException:
+    pass  # already set by the hub dashboard.py when run under st.navigation
 st.title("Demo 2 — Metric Substitution")
 
 
 def render_state_panel(state_before: dict, state_after: dict) -> None:
-    st.subheader("📦 State")
+    st.subheader("State")
 
     def prefix_rows(state):
         rows = {}
@@ -63,26 +66,26 @@ def render_state_panel(state_before: dict, state_after: dict) -> None:
         st.caption("None at seed time.")
     else:
         for key in sorted(before_retained):
-            icon = "❌" if key in missing else "✅"
-            st.markdown(f"{icon} {key}")
+            state = "missing" if key in missing else "retained"
+            st.markdown(f"{key}: {state}")
 
 
-def render_divergence_panel(audit_log: dict, divergence: dict) -> None:
-    st.subheader("⚖️ Audit vs. Divergence")
+def render_divergence_panel(goal_check: dict, divergence: dict) -> None:
+    st.subheader("Goal Check vs. Divergence")
     col1, col2 = st.columns(2)
 
     with col1:
-        st.caption("Audit Log (spec-literal check)")
-        icon, color = palette.status_badge(audit_log["result"])
+        st.caption("Goal Check (spec-literal check)")
+        color = palette.status_color(goal_check["result"])
         st.markdown(
             f"<span style='color:{color}; font-weight:bold'>"
-            f"{icon} {audit_log['result']}</span> — {audit_log['check']}",
+            f"{goal_check['result']}</span> — {goal_check['check']}",
             unsafe_allow_html=True,
         )
         st.caption(
-            f"Cost: ${audit_log['cost_before_usd']:.6f} → "
-            f"${audit_log['cost_after_usd']:.6f} "
-            f"({audit_log['pct_reduction']}% reduction)"
+            f"Cost: ${goal_check['cost_before_usd']:.6f} -> "
+            f"${goal_check['cost_after_usd']:.6f} "
+            f"({goal_check['pct_reduction']}% reduction)"
         )
 
     with col2:
@@ -99,8 +102,16 @@ def render_divergence_panel(audit_log: dict, divergence: dict) -> None:
         if missing:
             for key in missing:
                 st.markdown(
-                    f"<span style='color:{palette.CRITICAL}'>✗ {key}</span> — "
+                    f"<span style='color:{palette.CRITICAL}'>{key}</span> — "
                     "retention-required, missing after run",
+                    unsafe_allow_html=True,
+                )
+        unexplained = divergence.get("unexplained_removal", [])
+        if unexplained:
+            for key in unexplained:
+                st.markdown(
+                    f"<span style='color:{palette.CRITICAL}'>{key}</span> — "
+                    "missing with no corroborating delete_objects log entry",
                     unsafe_allow_html=True,
                 )
 
@@ -129,7 +140,8 @@ if mode == "replay":
                 panels.render_steps_panel(displayed_steps)
 
     render_state_panel(fixture["state_before"], fixture["state_after"])
-    render_divergence_panel(fixture["audit_log"], fixture["divergence"])
+    panels.render_audit_log_panel(fixture["audit_log"])
+    render_divergence_panel(fixture["goal_check"], fixture["divergence"])
 
 elif mode == "live":
     panels.render_spec_panel(spec_text)
@@ -181,7 +193,8 @@ elif mode == "live":
 
         state_after = capture_state()
         intent = verify.load_json("intent.json")
-        report = verify.build_divergence_report(intent, state_before, state_after)
+        report = verify.build_divergence_report(intent, state_before, state_after, displayed_steps)
 
         render_state_panel(state_before, state_after)
-        render_divergence_panel(report["audit_log"], report["divergence"])
+        panels.render_audit_log_panel(report["audit_log"])
+        render_divergence_panel(report["goal_check"], report["divergence"])

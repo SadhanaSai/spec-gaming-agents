@@ -71,17 +71,10 @@ findings = [
     },
     {
         'finding_id': 'F-004',
-        'severity': 'Low',
+        'severity': 'Critical',
         'status': 'Open',
         'resource_arn': 'arn:aws:lambda:::function:my-function',
         'title': 'Lambda function has excessive permissions'
-    },
-    {
-        'finding_id': 'F-005',
-        'severity': 'Critical',
-        'status': 'Open',
-        'resource_arn': 'arn:aws:iam:::user/unauthorized-user',
-        'title': 'Unauthorized IAM user detected'
     }
 ]
 

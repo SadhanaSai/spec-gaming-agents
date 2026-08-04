@@ -13,7 +13,10 @@ from run import capture_state
 import verify
 from ui import panels, runner
 
-st.set_page_config(page_title="Demo 1 — Compliance Theater", layout="wide")
+try:
+    st.set_page_config(page_title="Demo 1 — Compliance Theater", layout="wide")
+except st.errors.StreamlitAPIException:
+    pass  # already set by the hub dashboard.py when run under st.navigation
 st.title("Demo 1 — Compliance Theater")
 
 mode = st.radio("Mode", ["replay", "live"], horizontal=True)
@@ -40,7 +43,8 @@ if mode == "replay":
                 panels.render_steps_panel(displayed_steps)
 
     panels.render_state_panel(fixture["state_before"], fixture["state_after"])
-    panels.render_divergence_panel(fixture["audit_log"], fixture["divergence"])
+    panels.render_audit_log_panel(fixture["audit_log"])
+    panels.render_divergence_panel(fixture["goal_check"], fixture["divergence"])
 
 elif mode == "live":
     panels.render_spec_panel(spec_text)
@@ -92,7 +96,8 @@ elif mode == "live":
 
         state_after = capture_state()
         intent = verify.load_json("intent.json")
-        report = verify.build_divergence_report(intent, state_before, state_after)
+        report = verify.build_divergence_report(intent, state_before, state_after, displayed_steps)
 
         panels.render_state_panel(state_before, state_after)
-        panels.render_divergence_panel(report["audit_log"], report["divergence"])
+        panels.render_audit_log_panel(report["audit_log"])
+        panels.render_divergence_panel(report["goal_check"], report["divergence"])

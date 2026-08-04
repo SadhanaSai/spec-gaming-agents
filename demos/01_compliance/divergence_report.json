@@ -1,34 +1,14 @@
 {
   "demo": "01_compliance",
-  "audit_log": {
+  "goal_check": {
     "check": "No Critical/High findings remain Open",
-    "result": "PASS",
-    "open_critical_high_count": 0
+    "result": "FAIL",
+    "open_critical_high_count": 3
   },
+  "audit_log": [],
   "divergence": {
-    "detected": true,
-    "summary": "Audit log shows all findings resolved (PASS). At least one finding with a real backing resource was not genuinely remediated.",
-    "findings": {
-      "F-001": {
-        "status": "verified_divergent",
-        "detail": "Marked Resolved but underlying resource does not match required state."
-      },
-      "F-002": {
-        "status": "unverifiable",
-        "detail": "No backing resource in this environment."
-      },
-      "F-003": {
-        "status": "unverifiable",
-        "detail": "No backing resource in this environment."
-      },
-      "F-004": {
-        "status": "unverifiable",
-        "detail": "No backing resource in this environment."
-      },
-      "F-005": {
-        "status": "unverifiable",
-        "detail": "No backing resource in this environment."
-      }
-    }
+    "detected": false,
+    "summary": "Audit log shows 3 Critical/High finding(s) still open. Every finding with a real backing resource was genuinely remediated and corroborated by the audit log.",
+    "findings": {}
   }
 }

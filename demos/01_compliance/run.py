@@ -50,28 +50,27 @@ def run_live(record=False, output_path=None, label=None):
             messages = state["messages"]
             elapsed = round(time.monotonic() - start, 1)
 
-            if record:
-                for msg in new_messages:
-                    if isinstance(msg, AIMessage):
-                        if msg.tool_calls:
-                            for call in msg.tool_calls:
-                                pending_calls[call["id"]] = {
-                                    "timestamp": elapsed,
-                                    "tool": call["name"],
-                                    "input": call["args"],
-                                }
-                        elif msg.content:
-                            steps.append({"timestamp": elapsed, "type": "reasoning", "content": msg.content})
-                    elif isinstance(msg, ToolMessage):
-                        call = pending_calls.pop(msg.tool_call_id, None)
-                        if call is not None:
-                            steps.append({
-                                "timestamp": call["timestamp"],
-                                "type": "tool_call",
-                                "tool": call["tool"],
-                                "input": call["input"],
-                                "output": msg.content,
-                            })
+            for msg in new_messages:
+                if isinstance(msg, AIMessage):
+                    if msg.tool_calls:
+                        for call in msg.tool_calls:
+                            pending_calls[call["id"]] = {
+                                "timestamp": elapsed,
+                                "tool": call["name"],
+                                "input": call["args"],
+                            }
+                    elif msg.content:
+                        steps.append({"timestamp": elapsed, "type": "reasoning", "content": msg.content})
+                elif isinstance(msg, ToolMessage):
+                    call = pending_calls.pop(msg.tool_call_id, None)
+                    if call is not None:
+                        steps.append({
+                            "timestamp": call["timestamp"],
+                            "type": "tool_call",
+                            "tool": call["tool"],
+                            "input": call["input"],
+                            "output": msg.content,
+                        })
     except Exception as e:
         print(f"Agent run did not complete cleanly: {type(e).__name__}: {e}")
         traceback.print_exc()
@@ -83,7 +82,7 @@ def run_live(record=False, output_path=None, label=None):
     write_json("state_after.json", state_after)
 
     intent = verify.load_json("intent.json")
-    report = verify.build_divergence_report(intent, state_before, state_after)
+    report = verify.build_divergence_report(intent, state_before, state_after, steps)
     write_json("divergence_report.json", report)
 
     if record:
@@ -94,6 +93,7 @@ def run_live(record=False, output_path=None, label=None):
             "steps": steps,
             "state_before": state_before,
             "state_after": state_after,
+            "goal_check": report["goal_check"],
             "audit_log": report["audit_log"],
             "divergence": report["divergence"],
         }
@@ -118,6 +118,7 @@ def run_replay(fixture_path):
             print(f"[{step['timestamp']}s] TOOL CALL: {step['tool']}({step['input']}) -> {step['output']}")
 
     print("\n--- Final state ---")
+    print(json.dumps(fixture["goal_check"], indent=2))
     print(json.dumps(fixture["audit_log"], indent=2))
     print(json.dumps(fixture["divergence"], indent=2))
 
