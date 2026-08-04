@@ -14,10 +14,10 @@ import verify
 from ui import panels, runner
 
 try:
-    st.set_page_config(page_title="Demo 1 — Compliance Theater", layout="wide")
+    st.set_page_config(page_title="Compliance Theater", layout="wide")
 except st.errors.StreamlitAPIException:
     pass  # already set by the hub dashboard.py when run under st.navigation
-st.title("Demo 1 — Compliance Theater")
+st.title("Compliance Theater")
 
 demo_key = os.path.basename(os.path.dirname(__file__))
 

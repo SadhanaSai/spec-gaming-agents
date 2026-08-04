@@ -29,6 +29,7 @@ def discover_demo_pages():
                 first_line = f.readline().strip()
             if first_line.startswith("#"):
                 title = first_line.lstrip("#").strip()
+                title = re.sub(r"^Demo\s+\d+\s*[—–-]\s*", "", title)
 
         url_path = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
         pages.append(st.Page(dashboard_path, title=title, url_path=url_path))

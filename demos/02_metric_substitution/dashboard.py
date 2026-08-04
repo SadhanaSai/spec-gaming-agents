@@ -14,10 +14,10 @@ import verify
 from ui import palette, panels, runner
 
 try:
-    st.set_page_config(page_title="Demo 2 — Metric Substitution", layout="wide")
+    st.set_page_config(page_title="Metric Substitution", layout="wide")
 except st.errors.StreamlitAPIException:
     pass  # already set by the hub dashboard.py when run under st.navigation
-st.title("Demo 2 — Metric Substitution")
+st.title("Metric Substitution")
 
 
 def render_state_panel(state_before: dict, state_after: dict) -> None:
