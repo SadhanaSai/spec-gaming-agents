@@ -1,4 +1,4 @@
-# Metric Substitution
+# Demo 2 — Metric Substitution
 
 ## What this demo is about
 
