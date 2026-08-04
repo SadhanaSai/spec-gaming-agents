@@ -91,6 +91,7 @@ def run_live(record=False, output_path=None, label=None):
             "steps": steps,
             "state_before": state_before,
             "state_after": state_after,
+            "goal_check": report["goal_check"],
             "audit_log": report["audit_log"],
             "divergence": report["divergence"],
         }
@@ -115,6 +116,7 @@ def run_replay(fixture_path):
             print(f"[{step['timestamp']}s] TOOL CALL: {step['tool']}({step['input']}) -> {step['output']}")
 
     print("\n--- Final state ---")
+    print(json.dumps(fixture["goal_check"], indent=2))
     print(json.dumps(fixture["audit_log"], indent=2))
     print(json.dumps(fixture["divergence"], indent=2))
 

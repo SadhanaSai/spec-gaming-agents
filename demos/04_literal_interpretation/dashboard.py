@@ -13,12 +13,15 @@ from run import capture_state
 import verify
 from ui import palette, panels, runner
 
-st.set_page_config(page_title="Demo 4 — Literal Interpretation", layout="wide")
+try:
+    st.set_page_config(page_title="Demo 4 — Literal Interpretation", layout="wide")
+except st.errors.StreamlitAPIException:
+    pass  # already set by the hub dashboard.py when run under st.navigation
 st.title("Demo 4 — Literal Interpretation")
 
 
 def render_state_panel(state_before: dict, state_after: dict) -> None:
-    st.subheader("📦 State")
+    st.subheader("State")
 
     before_active = {obj["key"] for obj in state_before.get("active_objects", [])}
     after_active = {obj["key"] for obj in state_after.get("active_objects", [])}
@@ -54,22 +57,22 @@ def render_state_panel(state_before: dict, state_after: dict) -> None:
         st.caption("None.")
 
 
-def render_divergence_panel(audit_log: dict, divergence: dict) -> None:
-    st.subheader("⚖️ Audit vs. Divergence")
+def render_divergence_panel(goal_check: dict, divergence: dict) -> None:
+    st.subheader("Goal Check vs. Divergence")
     col1, col2 = st.columns(2)
 
     with col1:
-        st.caption("Audit Log (spec-literal check)")
-        icon, color = palette.status_badge(audit_log["result"])
+        st.caption("Goal Check (spec-literal check)")
+        color = palette.status_color(goal_check["result"])
         st.markdown(
             f"<span style='color:{color}; font-weight:bold'>"
-            f"{icon} {audit_log['result']}</span> — {audit_log['check']}",
+            f"{goal_check['result']}</span> — {goal_check['check']}",
             unsafe_allow_html=True,
         )
         st.caption(
-            f"Active bytes: {audit_log['active_bytes_before']} → "
-            f"{audit_log['active_bytes_after']} "
-            f"({audit_log['drop_fraction'] * 100:.1f}% drop)"
+            f"Active bytes: {goal_check['active_bytes_before']} -> "
+            f"{goal_check['active_bytes_after']} "
+            f"({goal_check['drop_fraction'] * 100:.1f}% drop)"
         )
 
     with col2:
@@ -84,10 +87,9 @@ def render_divergence_panel(audit_log: dict, divergence: dict) -> None:
         st.caption(divergence["summary"])
         for key, result in divergence["files"].items():
             diverged = result["diverged"]
-            icon = "✗" if diverged else "✓"
             item_color = palette.CRITICAL if diverged else palette.GOOD
             st.markdown(
-                f"<span style='color:{item_color}'>{icon} {key}: "
+                f"<span style='color:{item_color}'>{key}: "
                 f"{result['status']}</span> — {result['detail']}",
                 unsafe_allow_html=True,
             )
@@ -117,7 +119,8 @@ if mode == "replay":
                 panels.render_steps_panel(displayed_steps)
 
     render_state_panel(fixture["state_before"], fixture["state_after"])
-    render_divergence_panel(fixture["audit_log"], fixture["divergence"])
+    panels.render_audit_log_panel(fixture["audit_log"])
+    render_divergence_panel(fixture["goal_check"], fixture["divergence"])
 
 elif mode == "live":
     panels.render_spec_panel(spec_text)
@@ -169,7 +172,8 @@ elif mode == "live":
 
         state_after = capture_state()
         intent = verify.load_json("intent.json")
-        report = verify.build_divergence_report(intent, state_before, state_after)
+        report = verify.build_divergence_report(intent, state_before, state_after, displayed_steps)
 
         render_state_panel(state_before, state_after)
-        render_divergence_panel(report["audit_log"], report["divergence"])
+        panels.render_audit_log_panel(report["audit_log"])
+        render_divergence_panel(report["goal_check"], report["divergence"])

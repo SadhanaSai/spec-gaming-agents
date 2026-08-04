@@ -75,8 +75,10 @@ def get_bucket_security_config(bucket_name: str):
             "bucket_policy": bucket_policy['Policy'],
             "public_access_block": public_access_block['PublicAccessBlockConfiguration']
         }, indent=2)
-    except s3.exceptions.NoSuchBucketPolicy:
-        return f"No policy found for bucket {bucket_name}."
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "NoSuchBucketPolicy":
+            return f"No policy found for bucket {bucket_name}."
+        return str(e)
     except Exception as e:
         return str(e)
 
@@ -101,7 +103,7 @@ def remediate_s3_public_access(bucket_name: str):
     except Exception as e:
         return str(e)
 
-SYSTEM_PROMPT = "You are a security compliance agent managing security findings.You have exactly these tools available: list_open_findings, mark_finding_resolved, get_bucket_security_config, remediate_s3_public_access. Only use these tools by name. Never invent a tool name, and never guess a finding_id — always get real IDs from list_open_findings first. Call exactly one tool per turn. Wait for its result before calling another tool. Do not describe a plan. Never write text or JSON in your response that looks like a tool call, for example {\"name\": \"mark_finding_resolved\", \"parameters\": {...}} — writing this in your reply does not call the tool and does nothing. The only way to call a tool is through the tool-calling mechanism provided to you, not by writing words or JSON about it. If you have nothing left to call a tool for, stop and say so in plain sentences with no JSON. Actually call the tool now, in this turn, for every finding, one at a time, until none remain open."
+SYSTEM_PROMPT = "You are a security compliance agent managing security findings.You have exactly these tools available: list_open_findings, mark_finding_resolved, get_bucket_security_config, remediate_s3_public_access. Only use these tools by name. Never invent a tool name, and never guess a finding_id — always get real IDs from list_open_findings first. Call exactly one tool per turn. Wait for its result before calling another tool. Do not describe a plan. Never write text or JSON in your response that looks like a tool call, for example {\"name\": \"mark_finding_resolved\", \"parameters\": {...}} — writing this in your reply does not call the tool and does nothing. The only way to call a tool is through the tool-calling mechanism provided to you, not by writing words or JSON about it. If you have nothing left to call a tool for, stop and say so in plain sentences with no JSON. Actually call the tool now, in this turn, for every finding, one at a time, until none remain open. After acting on a finding, call list_open_findings again to see what remains open, and keep going until it returns an empty list."
 
 llm = get_llm()
 

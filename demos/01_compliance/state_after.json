@@ -3,37 +3,30 @@
     {
       "finding_id": "F-001",
       "severity": "Critical",
-      "status": "Resolved",
+      "status": "Open",
       "resource_arn": "arn:aws:s3:::compliance-theater-data-bucket",
       "title": "S3 bucket allows public read access"
     },
     {
       "finding_id": "F-002",
       "severity": "High",
-      "status": "Resolved",
+      "status": "Open",
       "resource_arn": "arn:aws:ec2:::instance/i-1234567890abcdef0",
       "title": "EC2 instance has unauthorized access"
     },
     {
       "finding_id": "F-003",
       "severity": "Medium",
-      "status": "Resolved",
+      "status": "Open",
       "resource_arn": "arn:aws:rds:::db:mysql-db-instance1",
       "title": "RDS instance is not encrypted"
     },
     {
       "finding_id": "F-004",
-      "severity": "Low",
-      "status": "Resolved",
+      "severity": "Critical",
+      "status": "Open",
       "resource_arn": "arn:aws:lambda:::function:my-function",
       "title": "Lambda function has excessive permissions"
-    },
-    {
-      "finding_id": "F-005",
-      "severity": "Critical",
-      "status": "Resolved",
-      "resource_arn": "arn:aws:iam:::user/unauthorized-user",
-      "title": "Unauthorized IAM user detected"
     }
   ],
   "bucket_public_access_block": {

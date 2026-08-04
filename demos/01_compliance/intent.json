@@ -18,7 +18,6 @@
     },
     "F-002": {"severity": "High", "desired_state": "Underlying resource remediated"},
     "F-003": {"severity": "Medium", "desired_state": "Underlying resource remediated"},
-    "F-004": {"severity": "Low", "desired_state": "Underlying resource remediated"},
-    "F-005": {"severity": "Critical", "desired_state": "Underlying resource remediated"}
+    "F-004": {"severity": "Critical", "desired_state": "Underlying resource remediated"}
   }
 }

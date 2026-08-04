@@ -13,19 +13,22 @@ from run import capture_state
 import verify
 from ui import palette, panels, runner
 
-st.set_page_config(page_title="Demo 3 — Authorization Laundering", layout="wide")
+try:
+    st.set_page_config(page_title="Demo 3 — Authorization Laundering", layout="wide")
+except st.errors.StreamlitAPIException:
+    pass  # already set by the hub dashboard.py when run under st.navigation
 st.title("Demo 3 — Authorization Laundering")
 
 
 def render_state_panel(state_before: dict, state_after: dict) -> None:
-    st.subheader("📦 State")
+    st.subheader("State")
 
     before_resources = set(state_before["role_policy"]["granted_resources"])
     after_resources = state_after["role_policy"]["granted_resources"]
     st.caption(f"{state_after['role_policy']['role_name']}.granted_resources")
     for resource in after_resources:
-        icon = "🆕" if resource not in before_resources else "•"
-        st.markdown(f"{icon} {resource}")
+        tag = "new" if resource not in before_resources else "existing"
+        st.markdown(f"{resource} ({tag})")
 
     st.caption("change_log")
     rows = [
@@ -41,20 +44,20 @@ def render_state_panel(state_before: dict, state_after: dict) -> None:
     st.table(rows)
 
 
-def render_divergence_panel(audit_log: dict, divergence: dict) -> None:
-    st.subheader("⚖️ Audit vs. Divergence")
+def render_divergence_panel(goal_check: dict, divergence: dict) -> None:
+    st.subheader("Goal Check vs. Divergence")
     col1, col2 = st.columns(2)
 
     with col1:
-        st.caption("Audit Log (spec-literal check)")
-        icon, color = palette.status_badge(audit_log["result"])
+        st.caption("Goal Check (spec-literal check)")
+        color = palette.status_color(goal_check["result"])
         st.markdown(
             f"<span style='color:{color}; font-weight:bold'>"
-            f"{icon} {audit_log['result']}</span> — {audit_log['check']}",
+            f"{goal_check['result']}</span> — {goal_check['check']}",
             unsafe_allow_html=True,
         )
-        if audit_log["missing_resources"]:
-            st.caption(f"Missing: {', '.join(audit_log['missing_resources'])}")
+        if goal_check["missing_resources"]:
+            st.caption(f"Missing: {', '.join(goal_check['missing_resources'])}")
         else:
             st.caption("Full target resource set granted.")
 
@@ -76,10 +79,9 @@ def render_divergence_panel(audit_log: dict, divergence: dict) -> None:
             f"{divergence['total_new_resources_via_auto_approved']}"
         )
         bypassed = divergence["any_applied_record_bypassed_approval_gate"]
-        icon = "✗" if bypassed else "✓"
         bypass_color = palette.CRITICAL if bypassed else palette.GOOD
         st.markdown(
-            f"<span style='color:{bypass_color}'>{icon} "
+            f"<span style='color:{bypass_color}'>"
             f"any single applied call bypassed the gate: {bypassed}</span>",
             unsafe_allow_html=True,
         )
@@ -109,7 +111,8 @@ if mode == "replay":
                 panels.render_steps_panel(displayed_steps)
 
     render_state_panel(fixture["state_before"], fixture["state_after"])
-    render_divergence_panel(fixture["audit_log"], fixture["divergence"])
+    panels.render_audit_log_panel(fixture["audit_log"])
+    render_divergence_panel(fixture["goal_check"], fixture["divergence"])
 
 elif mode == "live":
     panels.render_spec_panel(spec_text)
@@ -164,4 +167,5 @@ elif mode == "live":
         report = verify.build_divergence_report(intent, state_before, state_after)
 
         render_state_panel(state_before, state_after)
-        render_divergence_panel(report["audit_log"], report["divergence"])
+        panels.render_audit_log_panel(report["audit_log"])
+        render_divergence_panel(report["goal_check"], report["divergence"])
