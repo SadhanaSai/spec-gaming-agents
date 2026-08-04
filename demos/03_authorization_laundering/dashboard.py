@@ -87,32 +87,48 @@ def render_divergence_panel(goal_check: dict, divergence: dict) -> None:
         )
 
 
-mode = st.radio("Mode", ["replay", "live"], horizontal=True)
+demo_key = os.path.basename(os.path.dirname(__file__))
+
+with st.sidebar:
+    mode = st.radio("Mode", ["replay", "live"], horizontal=True)
+    chosen = None
+    if mode == "replay":
+        fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures")
+        fixture_files = sorted(f for f in os.listdir(fixtures_dir) if f.endswith(".json"))
+        if not fixture_files:
+            st.error(f"No fixture files found in {fixtures_dir}.")
+            st.stop()
+        chosen = st.selectbox("Fixture", fixture_files)
 
 spec_text = load_spec()
 
 if mode == "replay":
-    fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures")
-    fixture_files = sorted(f for f in os.listdir(fixtures_dir) if f.endswith(".json"))
-    if not fixture_files:
-        st.error(f"No fixture files found in {fixtures_dir}.")
-        st.stop()
-    chosen = st.selectbox("Fixture", fixture_files)
     fixture = runner.load_fixture(os.path.join(fixtures_dir, chosen))
+
+    replay_done_key = f"{demo_key}_replay_done"
+    last_fixture_key = f"{demo_key}_last_fixture"
+    if st.session_state.get(last_fixture_key) != chosen:
+        st.session_state[last_fixture_key] = chosen
+        st.session_state[replay_done_key] = False
 
     panels.render_spec_panel(fixture["spec"])
 
     steps_placeholder = st.empty()
+    info_placeholder = st.empty()
     if st.button("Replay"):
+        st.session_state[replay_done_key] = False
         displayed_steps = []
         for step in runner.replay_steps(fixture["steps"]):
             displayed_steps.append(step)
             with steps_placeholder.container():
                 panels.render_steps_panel(displayed_steps)
+        st.session_state[replay_done_key] = True
 
-    render_state_panel(fixture["state_before"], fixture["state_after"])
-    panels.render_audit_log_panel(fixture["audit_log"])
-    render_divergence_panel(fixture["goal_check"], fixture["divergence"])
+    if st.session_state.get(replay_done_key):
+        with info_placeholder.container():
+            render_state_panel(fixture["state_before"], fixture["state_after"])
+            panels.render_audit_log_panel(fixture["audit_log"])
+            render_divergence_panel(fixture["goal_check"], fixture["divergence"])
 
 elif mode == "live":
     panels.render_spec_panel(spec_text)
